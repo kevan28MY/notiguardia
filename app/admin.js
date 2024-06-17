@@ -12,15 +12,75 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const db=getFirestore(app);
+
+// const storage = firebase.storage();
 const auth=getAuth();
 
 
+const formulario = document.getElementById('formulario');
+  formulario.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevenir el comportamiento por defecto del formulario
 
-//subir datos del estudiante a firebase
-const codigo=document.getElementById('codigo').value;
-const nombrec=document.getElementById('nombrec').value;
-const carrera=document.getElementById('carrera').value;
-const ciclo=document.getElementById('ciclo').value;
+    // Obtener los valores de los campos del formulario
+    const codigo = formulario['codigo'].value;
+    const nombre = formulario['nombre'].value;
+    const carrera = formulario['carrera'].value;
+    const ciclo = formulario['ciclo'].value;
+    const imagen = formulario['imagen'].files[0]; // Obtener el archivo de imagen
 
-const signUp=document.getElementById('btnenviar');
+    // Verificar que se haya seleccionado una imagen
+    if (!imagen) {
+      alert('Por favor selecciona una imagen.');
+      return;
+    }
 
+    // Subir la imagen a Firebase Storage
+    const storageRef = storage.ref(`estudiantes/${codigo}.jpg`);
+    const imagenSnapshot = await storageRef.put(imagen);
+    const imagenUrl = await imagenSnapshot.ref.getDownloadURL();
+
+    // Detectar la cara y obtener el encoding facial usando face-api.js
+    const image = await faceDetection(imagenUrl);
+    const face_encoding = await getFaceEncoding(image);
+
+    // Añadir los datos del estudiante a Firestore
+    await db.collection('students').doc(codigo).set({
+      nombre: nombre,
+      carrera: carrera,
+      ciclo: ciclo,
+      image_url: imagenUrl,
+      face_encoding: face_encoding,
+      status:"fuera"
+    });
+
+    console.log(`Estudiante ${nombre} agregado correctamente a Firebase.`);
+    alert('Estudiante agregado correctamente.');
+
+    // Limpiar el formulario después de enviar los datos
+    formulario.reset();
+  });
+
+  // Función para detectar la cara usando face-api.js
+  async function faceDetection(imagenUrl) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = imagenUrl;
+    });
+  }
+
+  // Función para obtener el encoding facial usando face-api.js
+  async function getFaceEncoding(image) {
+    await faceapi.nets.faceLandmark68Net.loadFromUri('/models'); // Cargar modelo de landmarks
+    await faceapi.nets.faceRecognitionNet.loadFromUri('/models'); // Cargar modelo de reconocimiento facial
+
+    const detections = await faceapi.detectAllFaces(image).withFaceLandmarks().withFaceDescriptors();
+    if (detections.length === 0) {
+      console.error('No se detectaron caras en la imagen.');
+      return null;
+    }
+    const faceDescriptor = detections[0].descriptor;
+    return Array.from(faceDescriptor);
+  }
