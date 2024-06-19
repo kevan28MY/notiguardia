@@ -34,17 +34,24 @@
     </div>
   </nav>
 
-  <div class="container mt-5">
+  <div class="container mt-5" id="studentForm" style="display: none;">
     <h1>Consulta de Estudiantes</h1>
     <div class="form-group">
-      <label for="codigoEstudiante">Buscar por código de estudiante:</label>
-      <input type="text" class="form-control" id="codigoEstudiante" placeholder="Código de Estudiante">
+      <!-- <label for="codigoEstudiante">Buscar por código de estudiante:</label>
+      <input type="text" class="form-control" id="codigoEstudiante" placeholder="Código de Estudiante"> -->
+      <form id="associateStudentForm">
+        <label for="studentCode">Código del Estudiante:</label>
+        <input type="text" id="studentCode" required>
+        <button type="submit">Asociar</button>
+      </form>
     </div>
     <br>
-    <button type="button" class="btn btn-primary"  id="buscarBtn"">Buscar</button>
+    <!-- <button type="button" class="btn btn-primary"  id="buscarBtn"">Buscar</button> -->
     
-    <div id="resultado" class="mt-3">
-
+    <div id="associateMessage"></div>
+    <div id="studentInfo" style="display: none;" class="mt-3" >
+      <h2>Información del Estudiante</h2>
+      <div id="resultado"></div>
     </div>
     <br>
 
@@ -67,36 +74,6 @@
           <td>El estudiante {nombre} ha ingresado a la universidad</td>
           <td>28/05/2023</td>
           <td>17:14</td>
-        </tr>
-        <tr>
-          <td>123456</td>
-          <td>El estudiante {nombre} ha salido de la universidad</td>
-          <td>28/05/2023</td>
-          <td>17:14</td>
-        </tr>
-        <tr>
-          <td>234567</td>
-          <td>El estudiante {nombre} ha ingresado a la universidad</td>
-          <td>15/12/2023</td>
-          <td>09:32</td>
-        </tr>
-        <tr>
-          <td>345678</td>
-          <td>El estudiante {nombre} ha salido de la universidad</td>
-          <td>02/03/2024</td>
-          <td>13:45</td>
-        </tr>
-        <tr>
-          <td>456789</td>
-          <td>El estudiante {nombre} ha ingresado a la universidad</td>
-          <td>18/06/2024</td>
-          <td>16:20</td>
-        </tr>
-        <tr>
-          <td>567890</td>
-          <td>El estudiante {nombre} ha salido de la universidad</td>
-          <td>30/11/2024</td>
-          <td>11:10</td>
         </tr>
       </tbody>
     </table>

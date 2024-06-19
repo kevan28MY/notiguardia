@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,getAdditionalUserInfo, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore,setDoc,doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -99,28 +99,37 @@ signIn.addEventListener('click', (event)=>{
     })
 });
 
-const googleLogin=document.getElementById('googleSignIn');
-googleLogin.addEventListener('click',function(){
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:4283750094.
-    signInWithPopup(auth,provider)
-    .then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    
-    // The signed-in user info.
-    const user = result.user;
-    console.log(user);
-    window.location.href="./app/dashboard.html";
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    });
-    // The email of the user's account used.
-    // const email = error.customData.email;
-    // The AuthCredential type that was used.
-    // const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
+const googleLogin = document.getElementById('googleSignIn');
+googleLogin.addEventListener('click', function () {
+    signInWithPopup(auth, provider)
+        .then(async (result) => {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+
+            // The signed-in user info.
+            const user = result.user;
+            const additionalUserInfo = getAdditionalUserInfo(result);
+
+            if (additionalUserInfo.isNewUser) {
+                // User is new, save their data
+                const userData = {
+                    email: user.email,
+                    nombre: user.displayName
+                };
+                const docRef = doc(db, "users", user.uid);
+                await setDoc(docRef, userData);
+            }
+
+            console.log(user);
+            window.location.href = "./app/dashboard.html";
+            // IdP data available using getAdditionalUserInfo(result)
+            // ...
+        }).catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            showMessage(`Error: ${errorMessage}`, 'signInMessage');
+            console.error('Error during Google sign-in:', error);
+        });
+});
