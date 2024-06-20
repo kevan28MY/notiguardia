@@ -11,7 +11,8 @@ const firebaseConfig = {
     appId: "1:424396633234:web:a6a8e3b527ce5dfe2fa24b",
     measurementId: "G-GQEZ65XR44"
 };
-
+//codigo actualizado
+const int=1;
 const app = initializeApp(firebaseConfig);
 const auth=getAuth();
 auth.lenguageCode='es'

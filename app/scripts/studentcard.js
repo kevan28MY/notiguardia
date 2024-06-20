@@ -21,6 +21,7 @@ const db = getFirestore(app);
 const studentsContainer = document.getElementById('studentsContainer');
 const studentInfo = document.getElementById('studentInfo');
 const associateMessage = document.getElementById('associateMessage');
+const refreshButton = document.getElementById('refreshButton');
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -47,6 +48,11 @@ onAuthStateChanged(auth, async (user) => {
                             await updateStudentCard(updatedStudentData);
                         }
                     });
+                });
+
+                // Manejar evento click del botón de actualizar
+                refreshButton.addEventListener('click', async () => {
+                    await renderStudentCards(userData.studentCodes);
                 });
 
                 // Función para renderizar tarjetas de estudiantes asociados
@@ -158,6 +164,10 @@ onAuthStateChanged(auth, async (user) => {
 
                         // Limpiar el formulario después de la asociación
                         document.getElementById('associateStudentForm').reset();
+
+                        // Volver a renderizar tarjetas de estudiantes
+                        userData = (await getDoc(userDocRef)).data(); // Obtener datos actualizados del usuario
+                        await renderStudentCards(userData.studentCodes);
                     } else {
                         showMessage('Estudiante no encontrado', 'associateMessage');
                     }

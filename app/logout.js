@@ -29,7 +29,7 @@ onAuthStateChanged(auth, (user)=>{
         })
     }
 })
-
+// codigo actualizado
 const logoutButton=document.getElementById('logout');
 logoutButton.addEventListener('click',()=>{
     localStorage.removeItem('loggedInUserId');
@@ -38,4 +38,4 @@ logoutButton.addEventListener('click',()=>{
         window.location.href="../index.html";
     })
 })
-
+// codigo actualizado
