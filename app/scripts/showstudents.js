@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection,doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot,arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection,doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAev2UYvws9Gb6T1z-pWIto_vrfXkiTAyw",
@@ -178,6 +178,46 @@ onAuthStateChanged(auth, async (user) => {
                     } catch (error) {
                         console.error('Error al eliminar la asociación:', error);
                     }
+                }
+
+                // Manejador para enviar el formulario de asociación de estudiantes
+                document.getElementById('associateStudentForm').addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    const studentCode = document.getElementById('studentCode').value.trim();
+
+                    // Verifica si el estudiante existe en Firestore
+                    const studentDocRef = doc(db, 'students', studentCode);
+                    const studentDocSnap = await getDoc(studentDocRef);
+
+                    if (studentDocSnap.exists()) {
+                        // Asocia estudiante con el usuario actual
+                        await updateDoc(userDocRef, {
+                            studentCodes: arrayUnion(studentCode) // Añade código de estudiante al usuario
+                        });
+
+                        // Actualiza el documento del estudiante con el ID del usuario
+                        await updateDoc(studentDocRef, {
+                            parentsID: arrayUnion(user.uid) // Añade ID de usuario a parentsID en students
+                        });
+
+                        // Muestra mensaje de éxito
+                        showMessage('Estudiante asociado correctamente', 'associateMessage');
+
+                        // Limpiar el formulario después de la asociación
+                        document.getElementById('associateStudentForm').reset();
+
+                        // Volver a renderizar tarjetas de estudiantes
+                        userData = (await getDoc(userDocRef)).data(); // Obtener datos actualizados del usuario
+                        await renderStudentCards(userData.studentCodes);
+                    } else {
+                        showMessage('Estudiante no encontrado', 'associateMessage');
+                    }
+                });
+
+                // Función para mostrar mensajes en la interfaz
+                function showMessage(message, messageId) {
+                    const messageContainer = document.getElementById(messageId);
+                    messageContainer.innerHTML = `<div class="alert alert-info mt-3">${message}</div>`;
                 }
             }
         } catch (error) {
